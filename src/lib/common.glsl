@@ -42,12 +42,16 @@ vec3 skyColor(vec3 dir) {
     vec3 col = mix(zen, hor, t);
 
     float sunVis = smoothstep(-0.12, 0.08, sh);
-    col += vec3(1.0, 0.72, 0.42) * (pow(sa, 6.0) * 0.25 + pow(sa, 48.0) * 0.45) * sunVis * (0.6 + 0.4 * dusk);
+    float sa2 = sa * sa; float sa4 = sa2 * sa2; float sa6 = sa4 * sa2;
+    float sa12 = sa6 * sa6; float sa24 = sa12 * sa12; float sa48 = sa24 * sa24;
+    col += vec3(1.0, 0.72, 0.42) * (sa6 * 0.25 + sa48 * 0.45) * sunVis * (0.6 + 0.4 * dusk);
 
     vec3 md = normalize(moonPosition);
     float ma = max(dot(dir, md), 0.0);
     float moonVis = smoothstep(0.08, -0.12, sh);
-    col += vec3(0.45, 0.55, 0.90) * (pow(ma, 8.0) * 0.10 + pow(ma, 64.0) * 0.18) * moonVis;
+    float ma2 = ma * ma; float ma4 = ma2 * ma2; float ma8 = ma4 * ma4;
+    float ma16 = ma8 * ma8; float ma32 = ma16 * ma16; float ma64 = ma32 * ma32;
+    col += vec3(0.45, 0.55, 0.90) * (ma8 * 0.10 + ma64 * 0.18) * moonVis;
 
     float l = dot(col, vec3(0.333));
     col = mix(col, vec3(l) * vec3(0.80, 0.84, 0.92), rainStrength * 0.8);

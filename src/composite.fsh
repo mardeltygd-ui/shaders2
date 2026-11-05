@@ -11,7 +11,7 @@ varying vec3 rayCol;
 
 void main() {
     vec3 c = texture2D(colortex0, texcoord).rgb;
-    float noise = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453);
+    float noise = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
 
 #ifdef GODRAYS
     // light shafts: RAY_SAMPLES depth taps marching toward the light, sky = light gets through
@@ -34,7 +34,7 @@ void main() {
 #endif
 
     // gentle tonemap, then back to display space
-    c = vec3(1.0) - exp(-c * 1.5);
+    c = c * 1.5 / (c * 1.5 + 0.55);   // cheap soft tonemap (no exp)
     c = sqrt(c);
 
     // slightly richer colours, warm by day and cool at night, lifted soft blacks
