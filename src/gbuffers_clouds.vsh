@@ -18,7 +18,7 @@ void main() {
     float day = dayFactor();
     float dusk = duskFactor();
     vec3 c = mix(vec3(0.10, 0.12, 0.24), vec3(1.0, 0.96, 0.92), day);
-    c = mix(c, vec3(1.0, 0.66, 0.48), dusk * 0.8);
+    c = mix(c, vec3(1.0, 0.82, 0.55), dusk * 0.8);
     c *= 1.0 - 0.35 * rainStrength;
     cloudC = c;
 }

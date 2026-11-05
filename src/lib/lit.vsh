@@ -31,7 +31,7 @@ void main() {
     lightCol = lightColor() * lightAmount();
     ambCol   = ambientColor();
     grade    = gradeColor();
-    fogCol   = lin(skyColor(vp.xyz / max(dist, 0.0001)));
+    fogCol   = lin(fogSkyColor(vp.xyz / max(dist, 0.0001)));
 
 #if defined(SHADOWS) && !defined(NO_SHADOW)
     vec4 wp = gbufferModelViewInverse * vp;

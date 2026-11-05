@@ -12,33 +12,32 @@ vec3 safeNorm(vec3 v) { return v / max(length(v), 0.0001); }
 // Colours below are authored in "display" space; buffers hold linear-ish (c*c).
 vec3 lin(vec3 c) { return c * c; }
 
-float sunHeight() { return dot(safeNorm(sunPosition), safeNorm(upPosition)); }
+float sunHeight()  { return dot(safeNorm(sunPosition), safeNorm(upPosition)); }
 float dayFactor()  { return smoothstep(-0.18, 0.22, sunHeight()); }
-float duskFactor() { float h = sunHeight(); return exp(-h * h * 14.0); }
+// golden-hour amount: 1 at the horizon, fades smoothly over ~0.5 of sun height
+float duskFactor() { float h = sunHeight(); return exp(-h * h * 8.0); }
 
-// Sky gradient for a view-space direction (day / sunset / night, sun + moon glow)
-vec3 skyColor(vec3 dir) {
-    vec3 up = safeNorm(upPosition);
-    float h = dot(dir, up);
+// Sky colour. h = height of the view direction (1 up, 0 horizon). Fog passes h = 0 so it is
+// always the horizon colour: golden in the morning and evening, blue by day, dark at night.
+vec3 skyColorH(vec3 dir, float h) {
     float sh = sunHeight();
     float day = dayFactor();
     float dusk = duskFactor();
 
-    vec3 dayZ   = vec3(0.30, 0.52, 0.92);
-    vec3 dayH   = vec3(0.93, 0.88, 0.80);
-    vec3 duskZ  = vec3(0.28, 0.30, 0.58);
-    vec3 duskH  = vec3(1.00, 0.58, 0.34);
-    vec3 nightZ = vec3(0.015, 0.025, 0.075);
-    vec3 nightH = vec3(0.07, 0.09, 0.18);
+    vec3 dayZ   = vec3(0.26, 0.48, 0.92);
+    vec3 dayH   = vec3(0.68, 0.82, 0.97);
+    vec3 duskZ  = vec3(0.40, 0.50, 0.82);
+    vec3 duskH  = vec3(1.00, 0.80, 0.42);
+    vec3 nightZ = vec3(0.010, 0.015, 0.050);
+    vec3 nightH = vec3(0.045, 0.060, 0.140);
 
     vec3 zen = mix(nightZ, dayZ, day);
     vec3 hor = mix(nightH, dayH, day);
     zen = mix(zen, duskZ, dusk * 0.6);
     hor = mix(hor, duskH, dusk);
 
-    vec3 sd = safeNorm(sunPosition);
-    float sa = max(dot(dir, sd), 0.0);
-    hor = mix(hor, vec3(1.0, 0.62, 0.36), dusk * sa * sa * 0.5);
+    float sa = max(dot(dir, safeNorm(sunPosition)), 0.0);
+    hor = mix(hor, vec3(1.0, 0.72, 0.34), dusk * sa * sa * 0.5);
 
     float t = exp(-max(h, 0.0) * 3.0);
     vec3 col = mix(zen, hor, t);
@@ -46,11 +45,10 @@ vec3 skyColor(vec3 dir) {
     float sunVis = smoothstep(-0.12, 0.08, sh);
     float sa2 = sa * sa; float sa4 = sa2 * sa2; float sa6 = sa4 * sa2;
     float sa12 = sa6 * sa6; float sa24 = sa12 * sa12; float sa48 = sa24 * sa24;
-    col += vec3(1.0, 0.72, 0.42) * (sa6 * 0.10 + sa48 * 0.35) * sunVis * (0.6 + 0.4 * dusk);
+    col += vec3(1.0, 0.82, 0.50) * (sa6 * 0.10 + sa48 * 0.35) * sunVis * (0.6 + 0.4 * dusk);
 
-    vec3 md = safeNorm(moonPosition);
-    float ma = max(dot(dir, md), 0.0);
-    float moonVis = smoothstep(0.08, -0.12, sh);
+    float ma = max(dot(dir, safeNorm(moonPosition)), 0.0);
+    float moonVis = 1.0 - smoothstep(-0.12, 0.08, sh);
     float ma2 = ma * ma; float ma4 = ma2 * ma2; float ma8 = ma4 * ma4;
     float ma16 = ma8 * ma8; float ma32 = ma16 * ma16; float ma64 = ma32 * ma32;
     col += vec3(0.45, 0.55, 0.90) * (ma8 * 0.10 + ma64 * 0.18) * moonVis;
@@ -59,13 +57,15 @@ vec3 skyColor(vec3 dir) {
     col = mix(col, vec3(l) * vec3(0.80, 0.84, 0.92), rainStrength * 0.8);
     return col;
 }
+vec3 skyColor(vec3 dir)    { return skyColorH(dir, dot(dir, safeNorm(upPosition))); }
+vec3 fogSkyColor(vec3 dir) { return skyColorH(dir, 0.0); }
 
 // Colour of the shadow-casting light (sun by day, moon by night)
 vec3 lightColor() {
     float sunSel = smoothstep(-0.03, 0.03, sunHeight());
     float dusk = duskFactor();
-    vec3 sunC  = mix(vec3(1.08, 0.94, 0.74), vec3(1.15, 0.62, 0.30), dusk);
-    vec3 moonC = vec3(0.17, 0.22, 0.45);
+    vec3 sunC  = mix(vec3(1.08, 0.94, 0.74), vec3(1.15, 0.80, 0.45), dusk);
+    vec3 moonC = vec3(0.11, 0.15, 0.32);
     return mix(moonC, sunC, sunSel);
 }
 
@@ -83,8 +83,8 @@ vec3 lightDirView() {
 vec3 ambientColor() {
     float day = dayFactor();
     float dusk = duskFactor();
-    vec3 a = mix(vec3(0.120, 0.150, 0.300), vec3(0.50, 0.57, 0.72), day);
-    a = mix(a, vec3(0.55, 0.42, 0.48), dusk * 0.5);
+    vec3 a = mix(vec3(0.050, 0.065, 0.140), vec3(0.50, 0.57, 0.72), day);
+    a = mix(a, vec3(0.62, 0.52, 0.50), dusk * 0.5);
     float l = dot(a, vec3(0.333));
     a = mix(a, vec3(l), rainStrength * 0.5) * (1.0 - 0.25 * rainStrength);
     return a;

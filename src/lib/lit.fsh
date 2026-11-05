@@ -45,7 +45,11 @@ float shadowTerm() {
 }
 
 void main() {
-    vec4 col = texture2D(texture, texcoord) * glcolor;
+    vec4 gc = glcolor;
+#ifdef ENTITY_STAGE
+    if (gc.a < 0.01) gc.a = 1.0;   // never let a zero vertex alpha hide the hand or mobs
+#endif
+    vec4 col = texture2D(texture, texcoord) * gc;
 #ifdef USE_ENTITY_COLOR
     col.rgb = mix(col.rgb, entityColor.rgb, entityColor.a);
 #endif
@@ -54,6 +58,9 @@ void main() {
 
     float skyL = clamp((lmcoord.y - 0.04) * 1.09, 0.0, 1.0);
     float blkL = clamp((lmcoord.x - 0.04) * 1.09, 0.0, 1.0);
+#ifdef ENTITY_STAGE
+    skyL = max(skyL, 0.45);        // hand and mobs are never pitch black
+#endif
 
     float soft = clamp(ndl * 0.85 + 0.15, 0.0, 1.0);
     float gate = smoothstep(0.35, 0.90, lmcoord.y);
@@ -65,7 +72,7 @@ void main() {
     vec3 c = albedo * (direct + amb + block + vec3(0.050, 0.055, 0.075));
 
     float fr = max(far, 64.0);
-    float fogAmt = smoothstep(fr * (0.20 - 0.10 * rainStrength), fr * 0.95, dist) * 0.92;
+    float fogAmt = smoothstep(fr * (0.35 - 0.10 * rainStrength), fr, dist) * (0.60 + 0.20 * rainStrength);
     vec3 fogC = fogCol * mix(0.35, 1.0, skyL);
     if (isEyeInWater == 1) {
         fogC = lin(vec3(0.10, 0.34, 0.46)) * (0.25 + 0.75 * dayFactor());

@@ -25,7 +25,7 @@ void main() {
     vec3 dir = normalize(p.xyz / p.w);
 
     // vanilla stars are drawn as grey quads; the sky dome is never exactly grey
-    bool star = glcolor.r == glcolor.g && glcolor.g == glcolor.b && glcolor.r > 0.0;
+    bool star = glcolor.r > 0.9 && glcolor.g > 0.9 && glcolor.b > 0.9;
 
     vec4 outCol;
     if (star) {
@@ -36,11 +36,19 @@ void main() {
 #ifdef SKY_RAYS
         float sh = sunHeight();
         float calm = 1.0 - rainStrength;
-        col += skyRays(dir, safeNorm(sunPosition), vec3(1.0, 0.74, 0.46),
+        col += skyRays(dir, safeNorm(sunPosition), vec3(1.0, 0.80, 0.50),
                        0.30 * smoothstep(-0.12, 0.08, sh) * (0.6 + 0.8 * duskFactor()) * calm);
         col += skyRays(dir, safeNorm(moonPosition), vec3(0.45, 0.55, 0.9),
-                       0.10 * smoothstep(0.08, -0.12, sh) * calm);
+                       0.10 * (1.0 - smoothstep(-0.12, 0.08, sh)) * calm);
 #endif
+        // sun and moon discs drawn here so they are always visible
+        float sh2 = sunHeight();
+        float sd = dot(dir, safeNorm(sunPosition));
+        float sunDisc = smoothstep(0.9935, 0.9965, sd) * smoothstep(-0.12, 0.08, sh2);
+        col = mix(col, mix(vec3(1.0, 0.96, 0.82), vec3(1.0, 0.80, 0.45), duskFactor()), sunDisc);
+        float md = dot(dir, safeNorm(moonPosition));
+        float moonDisc = smoothstep(0.9945, 0.9970, md) * (1.0 - smoothstep(-0.12, 0.08, sh2));
+        col = mix(col, vec3(0.86, 0.90, 1.0), moonDisc * 0.9);
         outCol = vec4(col, 1.0);
     }
 
