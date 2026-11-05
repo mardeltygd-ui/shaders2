@@ -4,19 +4,21 @@
 uniform vec3 sunPosition;
 uniform vec3 moonPosition;
 uniform vec3 upPosition;
-uniform vec3 shadowLightPosition;
 uniform float rainStrength;
+
+// normalize() that never produces NaN when a uniform is zero
+vec3 safeNorm(vec3 v) { return v / max(length(v), 0.0001); }
 
 // Colours below are authored in "display" space; buffers hold linear-ish (c*c).
 vec3 lin(vec3 c) { return c * c; }
 
-float sunHeight() { return dot(normalize(sunPosition), normalize(upPosition)); }
+float sunHeight() { return dot(safeNorm(sunPosition), safeNorm(upPosition)); }
 float dayFactor()  { return smoothstep(-0.18, 0.22, sunHeight()); }
 float duskFactor() { float h = sunHeight(); return exp(-h * h * 14.0); }
 
 // Sky gradient for a view-space direction (day / sunset / night, sun + moon glow)
 vec3 skyColor(vec3 dir) {
-    vec3 up = normalize(upPosition);
+    vec3 up = safeNorm(upPosition);
     float h = dot(dir, up);
     float sh = sunHeight();
     float day = dayFactor();
@@ -34,7 +36,7 @@ vec3 skyColor(vec3 dir) {
     zen = mix(zen, duskZ, dusk * 0.6);
     hor = mix(hor, duskH, dusk);
 
-    vec3 sd = normalize(sunPosition);
+    vec3 sd = safeNorm(sunPosition);
     float sa = max(dot(dir, sd), 0.0);
     hor = mix(hor, vec3(1.0, 0.62, 0.36), dusk * sa * sa * 0.5);
 
@@ -46,7 +48,7 @@ vec3 skyColor(vec3 dir) {
     float sa12 = sa6 * sa6; float sa24 = sa12 * sa12; float sa48 = sa24 * sa24;
     col += vec3(1.0, 0.72, 0.42) * (sa6 * 0.10 + sa48 * 0.35) * sunVis * (0.6 + 0.4 * dusk);
 
-    vec3 md = normalize(moonPosition);
+    vec3 md = safeNorm(moonPosition);
     float ma = max(dot(dir, md), 0.0);
     float moonVis = smoothstep(0.08, -0.12, sh);
     float ma2 = ma * ma; float ma4 = ma2 * ma2; float ma8 = ma4 * ma4;
@@ -69,8 +71,12 @@ vec3 lightColor() {
 
 // Fades to zero when the shadow light touches the horizon, so the sun->moon switch never pops
 float lightAmount() {
-    float lh = dot(normalize(shadowLightPosition), normalize(upPosition));
-    return smoothstep(0.0, 0.28, lh) * (1.0 - rainStrength * 0.75);
+    return smoothstep(0.0, 0.28, abs(sunHeight())) * (1.0 - rainStrength * 0.75);
+}
+
+// View-space direction TO the shadow-casting light: sun by day, moon by night
+vec3 lightDirView() {
+    return safeNorm(mix(moonPosition, sunPosition, step(0.0, sunHeight())));
 }
 
 // Soft ambient light (cool lifted shadows by day, deep blue at night)

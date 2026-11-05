@@ -55,17 +55,18 @@ void main() {
     float skyL = clamp((lmcoord.y - 0.04) * 1.09, 0.0, 1.0);
     float blkL = clamp((lmcoord.x - 0.04) * 1.09, 0.0, 1.0);
 
-    float soft = clamp(ndl * 0.65 + 0.35, 0.0, 1.0);
+    float soft = clamp(ndl * 0.85 + 0.15, 0.0, 1.0);
     float gate = smoothstep(0.35, 0.90, lmcoord.y);
     vec3 direct = lightCol * (soft * gate * shadowTerm());
 
-    vec3 amb = ambCol * ((0.78 + 0.22 * upDot) * skyL * skyL);
+    vec3 amb = ambCol * ((0.68 + 0.32 * upDot) * skyL * skyL);
     vec3 block = vec3(1.0, 0.60, 0.30) * (blkL * blkL * 1.6);
 
-    vec3 c = albedo * (direct + amb + block + vec3(0.030, 0.034, 0.050));
+    vec3 c = albedo * (direct + amb + block + vec3(0.050, 0.055, 0.075));
 
-    float fogAmt = smoothstep(far * (0.55 - 0.2 * rainStrength), far * 0.98, dist);
-    vec3 fogC = fogCol * mix(0.3, 1.0, skyL);
+    float fr = max(far, 64.0);
+    float fogAmt = smoothstep(fr * (0.20 - 0.10 * rainStrength), fr * 0.95, dist) * 0.92;
+    vec3 fogC = fogCol * mix(0.35, 1.0, skyL);
     if (isEyeInWater == 1) {
         fogC = lin(vec3(0.10, 0.34, 0.46)) * (0.25 + 0.75 * dayFactor());
         fogAmt = 1.0 - exp(-dist * 0.07);
@@ -73,5 +74,5 @@ void main() {
     c = mix(c, fogC, fogAmt);
 
     /* DRAWBUFFERS:0 */
-    gl_FragData[0] = vec4(finish(c) * grade, col.a);
+    gl_FragData[0] = vec4(finish(max(c, vec3(0.0))) * grade, col.a);
 }

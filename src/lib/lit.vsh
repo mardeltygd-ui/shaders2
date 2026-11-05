@@ -22,11 +22,11 @@ void main() {
     lmcoord  = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
     glcolor  = gl_Color;
 
-    vec3 n = normalize(gl_NormalMatrix * gl_Normal);
+    vec3 n = safeNorm(gl_NormalMatrix * gl_Normal);
     vec4 vp = gl_ModelViewMatrix * gl_Vertex;
     dist = length(vp.xyz);
-    ndl   = dot(n, normalize(shadowLightPosition));
-    upDot = dot(n, normalize(upPosition));
+    ndl   = dot(n, lightDirView());
+    upDot = dot(n, safeNorm(upPosition));
 
     lightCol = lightColor() * lightAmount();
     ambCol   = ambientColor();
