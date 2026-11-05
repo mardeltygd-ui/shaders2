@@ -18,6 +18,7 @@ varying vec3 shadowPos;
 varying vec3 lightCol;
 varying vec3 ambCol;
 varying vec3 fogCol;
+varying vec3 grade;
 
 float shadowTerm() {
 #if defined(SHADOWS) && !defined(NO_SHADOW)
@@ -72,5 +73,5 @@ void main() {
     c = mix(c, fogC, fogAmt);
 
     /* DRAWBUFFERS:0 */
-    gl_FragData[0] = vec4(c, col.a);
+    gl_FragData[0] = vec4(finish(c) * grade, col.a);
 }

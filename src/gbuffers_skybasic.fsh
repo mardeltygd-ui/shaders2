@@ -19,7 +19,7 @@ void main() {
         float vis = (1.0 - dayFactor()) * (1.0 - rainStrength);
         outCol = vec4(vec3(1.0, 0.96, 0.88), glcolor.a * vis);
     } else {
-        outCol = vec4(lin(skyColor(dir)), 1.0);
+        outCol = vec4(skyColor(dir), 1.0);
     }
 
     /* DRAWBUFFERS:0 */

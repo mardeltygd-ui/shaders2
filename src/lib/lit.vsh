@@ -14,6 +14,7 @@ varying vec3 shadowPos;
 varying vec3 lightCol;   // per-vertex: cheap, the fragment shader only multiplies
 varying vec3 ambCol;
 varying vec3 fogCol;
+varying vec3 grade;
 
 void main() {
     gl_Position = ftransform();
@@ -29,6 +30,7 @@ void main() {
 
     lightCol = lightColor() * lightAmount();
     ambCol   = ambientColor();
+    grade    = gradeColor();
     fogCol   = lin(skyColor(vp.xyz / max(dist, 0.0001)));
 
 #if defined(SHADOWS) && !defined(NO_SHADOW)

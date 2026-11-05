@@ -44,7 +44,7 @@ vec3 skyColor(vec3 dir) {
     float sunVis = smoothstep(-0.12, 0.08, sh);
     float sa2 = sa * sa; float sa4 = sa2 * sa2; float sa6 = sa4 * sa2;
     float sa12 = sa6 * sa6; float sa24 = sa12 * sa12; float sa48 = sa24 * sa24;
-    col += vec3(1.0, 0.72, 0.42) * (sa6 * 0.25 + sa48 * 0.45) * sunVis * (0.6 + 0.4 * dusk);
+    col += vec3(1.0, 0.72, 0.42) * (sa6 * 0.10 + sa48 * 0.35) * sunVis * (0.6 + 0.4 * dusk);
 
     vec3 md = normalize(moonPosition);
     float ma = max(dot(dir, md), 0.0);
@@ -77,9 +77,20 @@ float lightAmount() {
 vec3 ambientColor() {
     float day = dayFactor();
     float dusk = duskFactor();
-    vec3 a = mix(vec3(0.050, 0.065, 0.140), vec3(0.50, 0.57, 0.72), day);
+    vec3 a = mix(vec3(0.120, 0.150, 0.300), vec3(0.50, 0.57, 0.72), day);
     a = mix(a, vec3(0.55, 0.42, 0.48), dusk * 0.5);
     float l = dot(a, vec3(0.333));
     a = mix(a, vec3(l), rainStrength * 0.5) * (1.0 - 0.25 * rainStrength);
     return a;
+}
+
+// Time-of-day colour grade: warm by day, cool at night
+vec3 gradeColor() {
+    return mix(vec3(0.96, 0.99, 1.06), vec3(1.0) + vec3(0.04, 0.0, -0.07) * WARMTH, dayFactor());
+}
+
+// Soft tonemap + back to display space (done here, so no full-screen pass is needed)
+vec3 finish(vec3 c) {
+    c = c * 1.4 / (c * 1.4 + 0.5);
+    return sqrt(c);
 }
