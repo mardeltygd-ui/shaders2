@@ -1,0 +1,16 @@
+option.SHADOWS=Тени
+option.SHADOWS.comment=Мягкие тени от блоков. Днём от солнца, ночью от луны.
+option.SHADOW_QUALITY=Мягкость теней
+option.SHADOW_QUALITY.comment=0 = 1 выборка (быстрее всего), 1 = 5 выборок (мягкие края).
+option.SHADOW_RES=Разрешение теней
+option.SHADOW_RES.comment=Меньше = быстрее. Для очень слабых ПК 512-768.
+option.SHADOW_DIST=Дальность теней
+option.SHADOW_DIST.comment=На каком расстоянии рисуются тени, в блоках.
+option.GODRAYS=Лучи света
+option.GODRAYS.comment=Дешёвые лучи вокруг солнца и луны.
+option.GODRAY_STRENGTH=Сила лучей
+option.RAY_SAMPLES=Качество лучей
+option.RAY_SAMPLES.comment=Меньше = быстрее.
+option.WARMTH=Теплота
+option.WARMTH.comment=Сила тёплой цветокоррекции.
+option.VIGNETTE=Виньетка

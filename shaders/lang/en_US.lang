@@ -1,0 +1,16 @@
+option.SHADOWS=Shadows
+option.SHADOWS.comment=Soft block shadows. Sun by day, moon by night.
+option.SHADOW_QUALITY=Shadow softness
+option.SHADOW_QUALITY.comment=0 = 1 tap (fastest), 1 = 5 taps (soft edges).
+option.SHADOW_RES=Shadow resolution
+option.SHADOW_RES.comment=Lower is faster. 512-768 for very weak PCs.
+option.SHADOW_DIST=Shadow distance
+option.SHADOW_DIST.comment=How far shadows are drawn, in blocks.
+option.GODRAYS=Light rays
+option.GODRAYS.comment=Cheap light shafts around the sun and moon.
+option.GODRAY_STRENGTH=Ray strength
+option.RAY_SAMPLES=Ray samples
+option.RAY_SAMPLES.comment=Lower is faster.
+option.WARMTH=Warmth
+option.WARMTH.comment=Strength of the warm colour grade.
+option.VIGNETTE=Vignette
